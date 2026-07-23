@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mblack | نسخة الجوال</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #fff;
+            color: #000;
+            overflow-x: hidden;
+        }
+
+        /* الستارة */
+        .curtain {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000;
+            animation: curtainUp 1.2s cubic-bezier(0.86,0,0.07,1) 0.3s forwards;
+        }
+        @keyframes curtainUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); visibility: hidden; }
+        }
+
+        .main-container {
+            opacity: 0;
+            animation: fadeIn 0.8s ease 1.2s forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        /* الهيدر */
+        header {
+            position: sticky; top: 0; background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px); border-bottom: 1px solid #eee;
+            padding: 0.8rem 5%; display: flex; justify-content: space-between;
+            align-items: center; z-index: 100;
+        }
+        .logo img { height: 110px; }
+        .menu-toggle {
+            background: none; border: none; cursor: pointer; padding: 0.5rem;
+            display: flex; flex-direction: column; gap: 5px; z-index: 200;
+        }
+        .menu-toggle span {
+            display: block; width: 25px; height: 2px; background: #000;
+            transition: 0.3s;
+        }
+        .menu-toggle.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .menu-toggle.open span:nth-child(2) { opacity: 0; }
+        .menu-toggle.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        /* القائمة الجانبية */
+        .mobile-nav {
+            position: fixed; top: 0; right: -100%; width: 75%; height: 100vh;
+            background: #fff; border-left: 2px solid #000;
+            display: flex; flex-direction: column; padding: 2rem;
+            transition: right 0.4s ease; z-index: 150;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+        }
+        .mobile-nav.active { right: 0; }
+        .mobile-nav a {
+            text-decoration: none; color: #000; font-size: 1.3rem;
+            font-weight: 600; padding: 1rem 0; border-bottom: 1px solid #eee;
+        }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 140; display: none;
+        }
+        .overlay.active { display: block; }
+
+        /* الأقسام */
+        .section { padding: 3rem 5%; max-width: 100%; margin: 0 auto; }
+        .section-title {
+            font-size: 2rem; font-weight: 900; margin-bottom: 1.5rem;
+            text-align: center; position: relative;
+        }
+        .section-title::after {
+            content: ''; display: block; width: 40px; height: 2px;
+            background: #000; margin: 0.8rem auto 0;
+        }
+
+        .svg-icon {
+            width: 24px; height: 24px; stroke: currentColor;
+            fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            vertical-align: middle;
+        }
+        .icon-large { width: 40px; height: 40px; }
+
+        .counters-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem;
+            text-align: center; padding: 2rem 0;
+        }
+        .counter-box { display: flex; flex-direction: column; align-items: center; }
+        .counter-number {
+            font-size: 3rem; font-weight: 900; display: inline-block;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .counter-label { font-size: 1.1rem; font-weight: 600; color: #555; }
+        .pulse { animation: pulseAnim 0.4s ease; }
+        @keyframes pulseAnim {
+            0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); }
+        }
+
+        .services-grid {
+            display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+        }
+        .service-card {
+            border: 2px solid #000; padding: 1.5rem; text-align: center;
+            transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+        }
+        .service-card:hover { background: #000; color: #fff; }
+
+        .portfolio-grid {
+            display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+        }
+        .portfolio-item { border: 2px solid #000; overflow: hidden; transition: 0.3s; }
+        .portfolio-item img { width: 100%; height: auto; aspect-ratio: 4/3; object-fit: cover; display: block; }
+        .portfolio-info { padding: 1rem; text-align: center; }
+
+        .btn-outline {
+            display: inline-block; padding: 0.6rem 1.5rem; border: 2px solid #000;
+            background: #fff; color: #000; font-weight: 700; text-decoration: none;
+            margin-top: 0.8rem; transition: 0.3s; cursor: pointer; font-size: 1rem;
+        }
+        .btn-outline:hover { background: #000; color: #fff; }
+
+        .pricing-grid {
+            display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+        }
+        .price-card { border: 2px solid #000; padding: 1.5rem; text-align: center; }
+        .price { font-size: 2rem; font-weight: 900; margin: 0.5rem 0; }
+        .price-card ul { list-style: none; margin: 1rem 0; }
+        .price-card li { margin: 0.5rem 0; }
+
+        .price-wrapper {
+            display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-top: 0.5rem;
+        }
+        .original-price {
+            text-decoration: line-through; color: #888; font-size: 0.9rem;
+        }
+        .discount-badge {
+            background: #000; color: #fff; font-size: 0.7rem; padding: 0.2rem 0.5rem;
+            border-radius: 20px; font-weight: 700;
+        }
+
+        .testimonials-grid {
+            display: grid; grid-template-columns: 1fr; gap: 1.5rem;
+        }
+        .testimonial-card { border: 2px solid #000; padding: 1.5rem; text-align: center; }
+        .testimonial-avatar {
+            width: 70px; height: 70px; border-radius: 50%; object-fit: cover;
+            border: 2px solid #000; margin-bottom: 1rem;
+        }
+
+        .comment-box { max-width: 100%; margin: 2rem auto 0; text-align: center; }
+        .comment-box textarea {
+            width: 100%; border: 2px solid #000; padding: 1rem;
+            font-family: inherit; resize: vertical;
+        }
+        .btn-black {
+            display: inline-block; padding: 0.8rem 2rem; background: #000;
+            color: #fff; border: 2px solid #000; font-weight: 700; cursor: pointer;
+            transition: 0.3s; width: 100%; margin-top: 0.5rem;
+        }
+        .btn-black:hover { background: #fff; color: #000; }
+        .success-msg { display: none; color: #2e7d32; margin-top: 0.5rem; }
+
+        .contact-buttons { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+        .contact-btn {
+            display: flex; align-items: center; gap: 0.8rem; padding: 1rem;
+            border: 2px solid #000; font-weight: 700; text-decoration: none;
+            color: #000; transition: 0.3s; width: 100%; justify-content: center;
+        }
+        .contact-btn .svg-icon { width: 24px; height: 24px; }
+        .contact-btn:hover { background: #000; color: #fff; }
+
+        .request-container { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        .vip-form input, .vip-form select, .vip-form textarea {
+            width: 100%; padding: 0.8rem; border: 2px solid #000;
+            margin-bottom: 1rem; font-family: inherit;
+        }
+        .package-list { margin-top: 1rem; }
+        .package-item { border: 2px solid #000; padding: 1.5rem; margin-bottom: 1rem; }
+
+        .domain-selector {
+            display: flex; flex-direction: column; gap: 1rem; margin: 1rem 0;
+        }
+        .domain-option {
+            border: 2px solid #000; padding: 1rem; text-align: center;
+            cursor: pointer; transition: 0.3s; display: flex;
+            align-items: center; justify-content: center; gap: 0.5rem;
+            font-weight: 600;
+        }
+        .domain-option.active { background: #000; color: #fff; }
+        .domain-option.active svg { stroke: #fff; }
+        .domain-option svg { width: 28px; height: 28px; stroke: #000; }
+
+        .extra-mods-box {
+            border: 2px dashed #000; padding: 1.5rem; margin: 1.5rem 0; display: none;
+        }
+        .extra-mods-box.active { display: block; }
+
+        .mod-option {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.8rem; border-bottom: 1px solid #ccc;
+        }
+        .mod-option:last-child { border-bottom: none; }
+
+        .limited-badge {
+            background: #000; color: #fff; padding: 0.2rem 0.6rem;
+            font-size: 0.7rem; margin-right: 0.5rem; border-radius: 20px;
+        }
+
+        footer { text-align: center; padding: 2rem; border-top: 1px solid #eee; margin-top: 2rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="curtain"></div>
+
+<div class="main-container">
+    <header>
+        <div class="logo"><img src="ChatGPT Image 21 يوليو 2026، 01_21_43 م.png"  alt="Mblack"></div>
+        <button class="menu-toggle" id="menuToggle">
+            <span></span><span></span><span></span>
+        </button>
+    </header>
+
+    <div class="overlay" id="overlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="#home" class="nav-link">الرئيسية</a>
+        <a href="#services" class="nav-link">الخدمات</a>
+        <a href="#portfolio" class="nav-link">معرض الأعمال</a>
+        <a href="#pricing" class="nav-link">الأسعار</a>
+        <a href="#testimonials" class="nav-link">آراء العملاء</a>
+        <a href="#contact" class="nav-link">تواصل</a>
+        <a href="#request" class="nav-link">طلب خدمة</a>
+    </nav>
+
+    <section id="home" class="section" style="text-align:center;">
+        <h1 style="font-size:2.5rem; font-weight:900;">حلول رقمية متكاملة</h1>
+        <p style="font-size:1.1rem; margin:1rem 0 2rem;">مواقع، تنظيم بيانات، تصميم محتوى، مونتاج.</p>
+        <a href="#services" class="btn-outline">اكتشف خدماتنا</a>
+    </section>
+
+    <section class="section" style="padding-top:0; padding-bottom:0;">
+        <div class="counters-grid">
+            <div class="counter-box">
+                <div class="counter-label">عميل سعيد</div>
+                <div><span class="counter-number" id="clientCounter">+300</span></div>
+            </div>
+            <div class="counter-box">
+                <div class="counter-label">موظف خبير</div>
+                <div><span class="counter-number" id="employeeCounter">+10</span></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="section">
+        <h2 class="section-title">الخدمات</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <svg class="svg-icon icon-large" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <h3>تصميم وتطوير مواقع</h3>
+                <p>مواقع بسيطة وحديثة متجاوبة.</p>
+            </div>
+            <div class="service-card">
+                <svg class="svg-icon icon-large" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <h3>تنظيم Google Sheets و Forms</h3>
+                <p>أتمتة البيانات ونماذج احترافية.</p>
+            </div>
+            <div class="service-card">
+                <svg class="svg-icon icon-large" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="16" y1="10" x2="21" y2="5"/></svg>
+                <h3>إنشاء وتعديل الصور</h3>
+                <p>تصميم جرافيك احترافي.</p>
+            </div>
+            <div class="service-card">
+                <svg class="svg-icon icon-large" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                <h3>Word</h3>
+                <p>إنشاء وتنسيق المستندات والتقارير.</p>
+            </div>
+            <div class="service-card">
+                <svg class="svg-icon icon-large" viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
+                <h3>تصميم منشورات السوشيال ميديا</h3>
+                <p>تصاميم عصرية وتعليقات جذابة.</p>
+            </div>
+            <div class="service-card">
+                <svg class="svg-icon icon-large" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                <h3>مونتاج فيديوهات قصيرة</h3>
+                <p>Shorts، Reels، TikTok بجودة احترافية.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="portfolio" class="section">
+        <h2 class="section-title">معرض الأعمال</h2>
+        <div class="portfolio-grid">
+            <div class="portfolio-item">
+                <img src="بلطي البحر - قائمة المأكولات البحرية - Google Chrome 7_22_2026 1_17_06 AM.png" alt="مشروع 1">
+                <div class="portfolio-info"><strong>موقع مينيو مطعم</strong><br><a href="https://mblackby-cmyk.github.io/-/" target="_blank" class="btn-outline">زيارة الموقع</a></div>
+            </div>
+            <div class="portfolio-item">
+                <img src="بطاقة أحمد محمد العربي - Google Chrome 7_22_2026 4_53_03 PM.png" alt="مشروع 2">
+                <div class="portfolio-info"><strong> موقع شخصي </strong><br><a href="https://mblackby-cmyk.github.io/profail-.../" target="_blank" class="btn-outline">زيارة الموقع</a></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="section">
+        <h2 class="section-title">باقات الأسعار</h2>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <h3>الباقة الأساسية</h3>
+                <div class="price-wrapper">
+                    <span class="original-price">133ج.م</span>
+                    <div class="price">99ج.م</div>
+                    <span class="discount-badge">25%</span>
+                </div>
+                <ul>
+                    <li>موقع بسيط من صفحة واحدة</li>
+                    <li>دومين مجاني + تعديلان   </li>
+                    <li> انشاء وتعديل 4 صور  </li>
+                </ul>
+                <a href="#" class="btn-outline order-package" data-package="الباقة الأساسية">اطلب الآن</a>
+            </div>
+            <div class="price-card">
+                <h3>الباقة الاحترافية</h3>
+                <div class="price-wrapper">
+                    <span class="original-price">222ج.م</span>
+                    <div class="price">166ج.م</div>
+                    <span class="discount-badge">25%</span>
+                </div>
+                <ul>
+                   <li>موقع بسيط متعدد الصفحات</li>
+                     <li>دومين مجاني + 3 تعديلات </li>
+                    <li> Google Sheets تنظيم 1</li>
+                </ul>
+                <a href="#" class="btn-outline order-package" data-package="الباقة الاحترافية">اطلب الآن</a>
+            </div>
+            <div class="price-card">
+                <h3>باقة المحتوى</h3>
+                <div class="price-wrapper">
+                    <span class="original-price">333ج.م</span>
+                    <div class="price">249ج.م</div>
+                    <span class="discount-badge">25%</span>
+                </div>
+                <ul>
+                     <li>مونتاج 5 فيديوهات قصيره</li>
+                   <li>  انشاء و تعديل 6 صور </li>
+                    <li> كتابه 4 ورقات word </li>
+                </ul>
+                <a href="#" class="btn-outline order-package" data-package="باقة المحتوى">اطلب الآن</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="testimonials" class="section">
+        <h2 class="section-title">آراء العملاء</h2>
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <img src="images.jpg" class="testimonial-avatar" alt="عميل">
+                <p>"التصميم راقي جداً والتسليم كان أسرع مما توقعت. أنصح به بشدة!"</p>
+                <strong>– سارة احمد </strong>
+            </div>
+            <div class="testimonial-card">
+                <img src="1.jpg" class="testimonial-avatar" alt="عميل">
+                <p>"نظم لي جوجل شيت بطريقة عبقري، وفر عليا أيام من الشغل. شكراً Mblack!"</p>
+                <strong>–  علي محمد </strong>
+            </div>
+            <div class="testimonial-card">
+                <img src="2.jpg" class="testimonial-avatar" alt="عميل">
+                <p>"المونتاج كان احترافي جدا، القناة بتاعتي بقت شكلها مختلف."</p>
+                <strong>– يوسف محمود</strong>
+            </div>
+        </div>
+        <div class="comment-box">
+            <textarea id="fakeComment" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
+            <button class="btn-black" id="submitComment">إرسال التعليق</button>
+            <p class="success-msg" id="successMsg">✅ تم إرسال تعليقك بنجاح!</p>
+        </div>
+    </section>
+
+    <section id="contact" class="section">
+        <h2 class="section-title">تواصل معنا</h2>
+        <div class="contact-buttons">
+            <a href="https://t.me/Mblack_By" target="_blank" class="contact-btn">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                تيليجرام
+            </a>
+            <a href="https://wa.me/201041758947" target="_blank" class="contact-btn">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                واتساب
+            </a>
+            <a href="tel:+201041758947" class="contact-btn">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                هاتف
+            </a>
+        </div>
+    </section>
+
+    <section id="request" class="section">
+        <h2 class="section-title">اطلب خدمتك الآن</h2>
+        <div class="request-container">
+            <div>
+                <h3>اختر باقتك</h3>
+                <div class="package-list">
+                    <div class="package-item">
+                        <strong>الباقة الأساسية</strong> - 100 ج.م
+                        <p>موقع بسيط متوسط وسهل الاستخدام + دومين مجاني + تعديلان     </p>
+                        <a href="#" class="btn-outline order-package" data-package="الباقة الأساسية">اطلب هذه الباقة</a>
+                    </div>
+                    <div class="package-item">
+                        <strong>الباقة الاحترافية</strong> - 700 ج.م
+                        <p>    موقع بسيط احترافي سهل الاستخدام + دومين مدفوع + تعديلان   </p>
+                        <a href="#" class="btn-outline order-package" data-package="الباقة الاحترافية">اطلب هذه الباقة</a>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h3>طلب VIP <span style="font-size:0.8rem; color:#555;">  رسوم طلب الخدمه والتنفيذ 100ج.م (عربون) </span></h3>
+                <form class="vip-form" id="vipForm">
+                    <input type="text" id="vipName" placeholder="الاسم الكامل" required>
+                    <input type="tel" id="vipPhone" placeholder="رقم الهاتف" required>
+                    <select id="vipType" required>
+                        <option value="">نوع الطلب</option>
+                        <option value="تجاري">تجاري</option>
+                        <option value="بروفايل شخصي">بروفايل شخصي</option>
+                        <option value="متجر إلكتروني">متجر إلكتروني</option>
+                        <option value="حملة إعلانية">حملة إعلانية</option>
+                        <option value="موقع شخصي " >موقع شخصي </option>
+                    </select>
+                    <textarea id="vipDesc" rows="4" placeholder="وصف الطلب بالتفصيل..."></textarea>
+
+                    <label style="font-weight:700; margin-bottom:0.5rem; display:block;">نوع الدومين:</label>
+                    <div class="domain-selector" id="domainSelector">
+                        <div class="domain-option active" data-domain="free">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            <span>دومين مجاني</span>
+                        </div>
+                        <div class="domain-option" data-domain="paid">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                            <span>دومين مدفوع</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="domainType" id="domainTypeInput" value="free">
+
+                    <div id="paidDomainBox" class="extra-mods-box">
+                        <p style="font-weight:700; margin-bottom:0.5rem;">ادفع اكثر وقوي موقعك واحصل علي تعديلات اضافيه .          </p>
+                        <p style="margin-bottom:1rem;">   اختر عدد التعديلات الإضافية المناسب لك :</p>
+                        
+                        <div class="mod-option">
+                            <span>2 تعديلات</span>
+                            <div class="price-wrapper">
+                                <span class="original-price">600 ج.م</span>
+                                <strong>450 ج.م</strong>
+                                <span class="discount-badge">25%</span>
+                            </div>
+                        </div>
+                        <div class="mod-option">
+                            <span>4 تعديلات</span>
+                            <div class="price-wrapper">
+                                <span class="original-price">1000 ج.م</span>
+                                <strong>750 ج.م</strong>
+                                <span class="discount-badge">25%</span>
+                            </div>
+                        </div>
+                        <div class="mod-option" style="background:#f8f8f8;">
+                            <span>
+                                <span class="limited-badge">عرض محدود</span>
+                                5 تعديلات
+                            </span>
+                            <div class="price-wrapper">
+                                <span class="original-price">910 ج.م</span>
+                                <strong>680 ج.م</strong>
+                                <span class="discount-badge">25%</span>
+                            </div>
+                        </div>
+                        <div class="mod-option">
+                            <span>20 تعديلات</span>
+                            <div class="price-wrapper">
+                                <span class="original-price">4000 ج.م</span>
+                                <strong>3000 ج.م</strong>
+                                <span class="discount-badge">25%</span>
+                            </div>
+                        </div>
+
+                        <select id="extraModsSelect" style="width:100%; margin-top:1rem; padding:0.8rem; border:2px solid #000;">
+                            <option value="">اختر مستوى الدومين والتعديلات</option>
+                            <option value="2 تعديلات - 450 ج.م">2 تعديلات - 450 ج.م</option>
+                            <option value="4 تعديلات - 750 ج.م">4 تعديلات - 750 ج.م</option>
+                            <option value="5 تعديلات - 680 ج.م (عرض محدود)">5 تعديلات - 680 ج.م (عرض محدود)</option>
+                            <option value="10 تعديلات - 3000 ج.م">20 تعديلات - 3000 ج.م</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-black">إرسال الطلب إلى واتساب</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>© 2026 Mblack. جميع الحقوق محفوظة.</footer>
+</div>
+
+<script>
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const overlay = document.getElementById('overlay');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    menuToggle.addEventListener('click', () => {
+        menuToggle.classList.toggle('open');
+        mobileNav.classList.toggle('active');
+        overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', closeMenu);
+    navLinks.forEach(link => link.addEventListener('click', closeMenu));
+
+    function closeMenu() {
+        menuToggle.classList.remove('open');
+        mobileNav.classList.remove('active');
+        overlay.classList.remove('active');
+    }
+
+    // عداد العملاء
+    const CLIENT_KEY = 'mblack_client_count';
+    let clientCount = localStorage.getItem(CLIENT_KEY) ? parseInt(localStorage.getItem(CLIENT_KEY)) : 300;
+    const clientEl = document.getElementById('clientCounter');
+    function updateClientDisplay() {
+        clientEl.textContent = '+' + clientCount;
+        clientEl.classList.add('pulse');
+        setTimeout(() => clientEl.classList.remove('pulse'), 400);
+    }
+    function incrementClient() {
+        clientCount++;
+        localStorage.setItem(CLIENT_KEY, clientCount);
+        updateClientDisplay();
+    }
+    updateClientDisplay();
+    setInterval(incrementClient, 5000);
+
+    // عداد الموظفين
+    const EMPLOYEE_KEY = 'mblack_employee_count';
+    const EMPLOYEE_DATE_KEY = 'mblack_employee_last_update';
+    let employeeCount = localStorage.getItem(EMPLOYEE_KEY) ? parseInt(localStorage.getItem(EMPLOYEE_KEY)) : 10;
+    let lastUpdate = localStorage.getItem(EMPLOYEE_DATE_KEY) ? new Date(localStorage.getItem(EMPLOYEE_DATE_KEY)) : new Date();
+    const employeeEl = document.getElementById('employeeCounter');
+    function updateEmployeeDisplay() {
+        employeeEl.textContent = '+' + employeeCount;
+        employeeEl.classList.add('pulse');
+        setTimeout(() => employeeEl.classList.remove('pulse'), 400);
+    }
+    function checkEmployeeIncrement() {
+        const now = new Date();
+        const diffDays = Math.floor((now - lastUpdate) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 1) {
+            employeeCount += diffDays;
+            localStorage.setItem(EMPLOYEE_KEY, employeeCount);
+            localStorage.setItem(EMPLOYEE_DATE_KEY, now.toISOString());
+            lastUpdate = now;
+            updateEmployeeDisplay();
+        }
+        const nextMidnight = new Date(now);
+        nextMidnight.setHours(24, 0, 0, 0);
+        const timeUntilNext = nextMidnight - now;
+        setTimeout(() => {
+            employeeCount++;
+            localStorage.setItem(EMPLOYEE_KEY, employeeCount);
+            localStorage.setItem(EMPLOYEE_DATE_KEY, new Date().toISOString());
+            updateEmployeeDisplay();
+            setInterval(() => {
+                employeeCount++;
+                localStorage.setItem(EMPLOYEE_KEY, employeeCount);
+                localStorage.setItem(EMPLOYEE_DATE_KEY, new Date().toISOString());
+                updateEmployeeDisplay();
+            }, 86400000);
+        }, timeUntilNext);
+    }
+    updateEmployeeDisplay();
+    checkEmployeeIncrement();
+
+    // تعليق وهمي
+    document.getElementById('submitComment').addEventListener('click', () => {
+        const ta = document.getElementById('fakeComment');
+        if (!ta.value.trim()) return;
+        document.getElementById('successMsg').style.display = 'block';
+        ta.value = '';
+        setTimeout(() => document.getElementById('successMsg').style.display = 'none', 3000);
+    });
+
+    // دومين
+    const domainOptions = document.querySelectorAll('.domain-option');
+    const domainTypeInput = document.getElementById('domainTypeInput');
+    const paidBox = document.getElementById('paidDomainBox');
+    const extraModsSelect = document.getElementById('extraModsSelect');
+
+    domainOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            domainOptions.forEach(opt => opt.classList.remove('active'));
+            option.classList.add('active');
+            const domain = option.getAttribute('data-domain');
+            domainTypeInput.value = domain;
+            if (domain === 'paid') {
+                paidBox.classList.add('active');
+            } else {
+                paidBox.classList.remove('active');
+                extraModsSelect.value = '';
+            }
+        });
+    });
+
+    const phone = '201041758947';
+
+    document.querySelectorAll('.order-package').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.preventDefault();
+            const pkg = btn.getAttribute('data-package');
+            window.open(`https://wa.me/${201041758947}?text=${encodeURIComponent('أود طلب ' + pkg)}`, '_blank');
+        });
+    });
+
+    document.getElementById('vipForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const name = document.getElementById('vipName').value.trim();
+        const vipPhone = document.getElementById('vipPhone').value.trim();
+        const type = document.getElementById('vipType').value;
+        const desc = document.getElementById('vipDesc').value.trim();
+        if (!name || !vipPhone || !type) return alert('يرجى ملء جميع الحقول المطلوبة');
+
+        const domainType = domainTypeInput.value;
+        let extraMods = '';
+        if (domainType === 'paid') {
+            extraMods = extraModsSelect.value;
+        }
+
+        const msg = `طلب VIP من Mblack:%0A
+الاسم: ${name}%0A
+الهاتف: ${vipPhone}%0A
+نوع الطلب: ${type}%0A
+التفاصيل: ${desc}%0A
+الدومين: ${domainType === 'free' ? 'مجاني' : 'مدفوع'}%0A
+${extraMods ? 'الباقة الإضافية: ' + extraMods : ''}%0A
+(رسوم طلب الخدمه 100ج.م (عربون))`;
+
+        window.open(`https://wa.me/${201041758947}?text=${encodeURIComponent(msg)}`, '_blank');
+        e.target.reset();
+        domainOptions[0].classList.add('active');
+        domainOptions[1].classList.remove('active');
+        domainTypeInput.value = 'free';
+        paidBox.classList.remove('active');
+        extraModsSelect.value = '';
+    });
+</script>
+</body>
+</html>
